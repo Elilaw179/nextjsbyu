@@ -125,11 +125,20 @@ export async function authenticate(
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
+  // try {
+  //   await nextAuthSignIn('credentials', {
+  //     email,
+  //     password,
+  //     redirect: false, // 🔑 REQUIRED
+  //   });
+
   try {
-    await nextAuthSignIn('credentials', {
-      email,
-      password,
-      redirect: false, // 🔑 REQUIRED
+   await nextAuthSignIn('credentials', {
+  redirect: true,
+  email,
+  password,
+  callbackUrl: '/dashboard',
+ // 🔑 REQUIRED
     });
 
     // ✅ YOU control navigation
