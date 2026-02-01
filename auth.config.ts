@@ -1,18 +1,55 @@
 
-import type { NextAuthConfig } from 'next-auth';
+// import type { NextAuthConfig } from 'next-auth';
 
-export const authConfig = {
-  secret: process.env.AUTH_SECRET, // ⚡ This fixes the MissingSecret error
+// export const authConfig = {
+//   secret: process.env.AUTH_SECRET, // ⚡ This fixes the MissingSecret error
+//   pages: {
+//     signIn: '/login',
+//   },
+//   callbacks: {
+//     authorized({ auth, request: { nextUrl } }) {
+//       const isLoggedIn = !!auth?.user;
+//       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+//       if (isOnDashboard) return isLoggedIn;
+//       return true;
+//     },
+//   },
+//   providers: [], // Add credentials provider in auth.ts
+// } satisfies NextAuthConfig;
+
+
+
+
+
+
+
+
+import type { NextAuthConfig } from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+
+export const authConfig: NextAuthConfig = {
+  providers: [
+    Credentials({
+      credentials: {
+        email: {},
+        password: {},
+      },
+      async authorize(credentials) {
+        if (
+          credentials?.email === 'user@nextmail.com' &&
+          credentials?.password === '123456'
+        ) {
+          return {
+            id: '1',
+            email: 'user@nextmail.com',
+            name: 'User',
+          };
+        }
+        return null;
+      },
+    }),
+  ],
   pages: {
     signIn: '/login',
   },
-  callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      if (isOnDashboard) return isLoggedIn;
-      return true;
-    },
-  },
-  providers: [], // Add credentials provider in auth.ts
-} satisfies NextAuthConfig;
+};
