@@ -117,7 +117,9 @@ export async function deleteInvoice(id: string) {
     return { message: 'Database Error: Failed to Delete Invoice.' };
   }
 }
- 
+
+
+
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
@@ -125,23 +127,14 @@ export async function authenticate(
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  // try {
-  //   await nextAuthSignIn('credentials', {
-  //     email,
-  //     password,
-  //     redirect: false, // 🔑 REQUIRED
-  //   });
-
   try {
-   await nextAuthSignIn('credentials', {
-  redirect: true,
-  email,
-  password,
-  callbackUrl: '/dashboard',
- // 🔑 REQUIRED
+    await nextAuthSignIn('credentials', {
+      email,
+      password,
+      redirect: false, // 🔑 IMPORTANT
     });
 
-    // ✅ YOU control navigation
+    // ✅ You control navigation
     redirect('/dashboard');
   } catch (error) {
     if (error instanceof AuthError) {
@@ -153,3 +146,44 @@ export async function authenticate(
     throw error;
   }
 }
+
+
+
+
+
+ 
+// export async function authenticate(
+//   prevState: string | undefined,
+//   formData: FormData,
+// ) {
+//   const email = formData.get('email') as string;
+//   const password = formData.get('password') as string;
+
+//   // try {
+//   //   await nextAuthSignIn('credentials', {
+//   //     email,
+//   //     password,
+//   //     redirect: false, // 🔑 REQUIRED
+//   //   });
+
+//   try {
+//    await nextAuthSignIn('credentials', {
+//   redirect: true,
+//   email,
+//   password,
+//   callbackUrl: '/dashboard',
+//  // 🔑 REQUIRED
+//     });
+
+//     // ✅ YOU control navigation
+//     redirect('/dashboard');
+//   } catch (error) {
+//     if (error instanceof AuthError) {
+//       if (error.type === 'CredentialsSignin') {
+//         return 'Invalid credentials.';
+//       }
+//       return 'Something went wrong.';
+//     }
+//     throw error;
+//   }
+// }
