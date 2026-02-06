@@ -4,10 +4,14 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getSql } from './db';
-
+import postgres from 'postgres';
+ 
 import { signIn as nextAuthSignIn } from '@/auth';
 import { AuthError } from 'next-auth';
+ 
+
+
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 // Zod schema
 const FormSchema = z.object({
@@ -56,7 +60,6 @@ export async function createInvoice(prevState: State, formData: FormData) {
   const date = new Date().toISOString().split('T')[0];
 
   try {
-    const sql = getSql();
     await sql`
       INSERT INTO invoices (customer_id, amount, status, date)
       VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
@@ -92,7 +95,6 @@ export async function updateInvoice(
   const amountInCents = amount * 100;
 
   try {
-    const sql = getSql();
     await sql`
       UPDATE invoices
       SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
@@ -109,7 +111,6 @@ export async function updateInvoice(
 // DELETE
 export async function deleteInvoice(id: string) {
   try {
-    const sql = getSql();
     await sql`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
   } catch (error) {

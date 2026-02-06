@@ -4,10 +4,11 @@ import { authConfig } from './auth.config';
 import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
-import { getSql } from './app/lib/db';
+import postgres from 'postgres';
+
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 async function getUser(email: string): Promise<User | undefined> {
-  const sql = getSql();
   const user = await sql<User[]>`SELECT * FROM users WHERE email=${email}`;
   return user[0];
 }

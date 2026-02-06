@@ -1,9 +1,10 @@
 import bcrypt from 'bcrypt';
-import { getSql } from '../lib/db';
+import postgres from 'postgres';
 import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 
-async function seedUsers(db?: ReturnType<typeof getSql>) {
-  const sql = db ?? getSql();
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+
+async function seedUsers() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await sql`
     CREATE TABLE IF NOT EXISTS users (
@@ -28,8 +29,7 @@ async function seedUsers(db?: ReturnType<typeof getSql>) {
   return insertedUsers;
 }
 
-async function seedInvoices(db?: ReturnType<typeof getSql>) {
-  const sql = db ?? getSql();
+async function seedInvoices() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
   await sql`
@@ -55,8 +55,7 @@ async function seedInvoices(db?: ReturnType<typeof getSql>) {
   return insertedInvoices;
 }
 
-async function seedCustomers(db?: ReturnType<typeof getSql>) {
-  const sql = db ?? getSql();
+async function seedCustomers() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
   await sql`
@@ -81,8 +80,7 @@ async function seedCustomers(db?: ReturnType<typeof getSql>) {
   return insertedCustomers;
 }
 
-async function seedRevenue(db?: ReturnType<typeof getSql>) {
-  const sql = db ?? getSql();
+async function seedRevenue() {
   await sql`
     CREATE TABLE IF NOT EXISTS revenue (
       month VARCHAR(4) NOT NULL UNIQUE,
@@ -105,15 +103,12 @@ async function seedRevenue(db?: ReturnType<typeof getSql>) {
 
 export async function GET() {
   try {
-    const sql = getSql();
-    // Run seeds inside a transaction using the transactional `sql` passed to
-    // each seeder so that they all run under the same transaction.
-    await sql.begin(async (tx) => {
-      await seedUsers(tx);
-      await seedCustomers(tx);
-      await seedInvoices(tx);
-      await seedRevenue(tx);
-    });
+    const result = await sql.begin((sql) => [
+      seedUsers(),
+      seedCustomers(),
+      seedInvoices(),
+      seedRevenue(),
+    ]);
 
     return Response.json({ message: 'Database seeded successfully' });
   } catch (error) {
